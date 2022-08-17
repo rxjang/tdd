@@ -115,3 +115,23 @@ Dollar times(int multiplier) {
 * equals()를 구현해야 한다. 
 * 해시 테이블의 키로 객체를 사용할 생각이라면 hashCode()를 같이 구현해야 한다.
 
+---
+## 4장. 프라이버시
+앞 장에서 동치성 문제를 적용 했으므로, 코드를 수정해 보자.
+``` java
+public void testMultiplication() {
+    Dollar five = new Dollar(5);
+    assertEquals(new Dollar(10), five.times(2));
+    assertEquals(new Dollar(15), five.times(3));
+}
+```
+이로 인해 amount를 private으로 바꿀 수 있게 되었다.
+
+``` java
+private int amount;
+```
+
+하지만 위험한 상황을 만들었다. 동치성 테스트가 동치성에 대한 코드가 정확히 작동한다는 것을 검증해야 한다.
+
+---
+
