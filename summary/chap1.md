@@ -148,5 +148,42 @@ public void testFrancMultiplication() {
 우선 Fracn을 작동하기 위해 Dollar 객체를 복사해 Franc을 만들자. 중복은 다음에 제거하도록 하자.
 
 ---
+## 6.돌아온 '모두를 위한 평등'
+이제 중복을 제거해 보자. 가능한 방법중 한가 지로, 다른 클래스를 우리가 만든 클래스가 상속받도록 하자. 부모 클래스로 Money 객체를 만들자.
+``` java
+public class Money {
+    proteced int amount;
+}
+```
+하위 클래스에서도 amount를 볼 수 있도록 private에서 protected로 변경했다. 이제 equals() 코드를 위로 올려보자. 
+
+``` java
+public class Money {
+
+    public boolean equals(Object object) {
+        Money money = (Money) object;
+        return amount == money.amount;
+    }
+}
+```
+Dollar객체와 Fran객체는 Money를 상속 받음으로써 중복을 줄일 수 있게 되었다.
+
+``` java
+public class Dollar extends Money {
+
+    public Dollar(int amount) {
+        this.amount = amount;
+    }
+
+    Dollar times(int multiplier) {
+        return new Dollar(amount * multiplier);
+    }
+
+}
+```
+이제 중복은 해결했고, 테스트도 정상적으로 작동한다. 그런데, Franc과 Dollar를 배교하면 어떻게 될까? 
+
+---
+
 
 
