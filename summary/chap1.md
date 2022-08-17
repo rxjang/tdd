@@ -134,4 +134,19 @@ private int amount;
 하지만 위험한 상황을 만들었다. 동치성 테스트가 동치성에 대한 코드가 정확히 작동한다는 것을 검증해야 한다.
 
 ---
+## 5장. 솔직히 말하자면
+`$5 + 10CHF = $10(환율이 2:1일 경우)`  
+이 테스트를 진행 해보자.
+우선은 Dollar와 비슷하게 작동하는 Franc이라는 객체를 검증하기 위한 테스트 부터 만들어 보자.
+``` java
+public void testFrancMultiplication() {
+    Franc five = new Franc(5);
+    assertEquals(new Franc(10), five.times(2));
+    assertEquals(new Franc(15), five.times(3));
+}
+```
+우선 Fracn을 작동하기 위해 Dollar 객체를 복사해 Franc을 만들자. 중복은 다음에 제거하도록 하자.
+
+---
+
 
