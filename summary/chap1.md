@@ -181,9 +181,75 @@ public class Dollar extends Money {
 
 }
 ```
-이제 중복은 해결했고, 테스트도 정상적으로 작동한다. 그런데, Franc과 Dollar를 배교하면 어떻게 될까? 
+이제 중복은 해결했고, 테스트도 정상적으로 작동한다. 그런데, Franc과 Dollar를 비교하면 어떻게 될까? 
 
 ---
+## 7장. 사과와 오렌지
+Franc과 Dollar를 비교하는 테스트를 작성해보자.
+``` java
+public void testEquality() {
+    assertTrue(new Dollar(5).equals(new Dollar(5)));
+    assertFalse(new Dollar(5).equals(new Dollar(6)));
+    assertTrue(new Franc(5).equals(new Franc(5)));
+    assertFalse(new Franc(5).equals(new Franc(6)));
+    assertFalse(new Franc(5).equals(new Dollar(5)));
+}
+```
+Frac과 Dollar가 equal이어서 실패한다. 동치성 코드에서 두 객체의 클래스를 비교하게 하자. 오직 금액과 클래스가 서로 동일할 떄만 두 Money가 서로 같은 것이다. 
+``` java
+public class Money {
+
+    public boolean equals(Object object) {
+        Money money = (Money) object;
+        return amount == money.amount
+                && getClass().equals(money.getClass());
+    }
+}
+```
+모댈 코드에서 클래스를 이런 식으로 사용하는 것은 좀 지저분해 보인다. 하지만 현재는 통화(currency) 개념 같은 게 없으므로 잠시만 이대로 두겠다.
+
+---
+## 8장. 객체 만들기
+Franc과 Dollar의 times() 구현 코드는 거의 똑같다. 양쪽 모두 Money를 반환하게 만들면 더 비슷하게 만들 수 있다.
+``` java
+Money times(int mutiplier) {
+    return new Franc(amount * mutiplier);
+}
+
+Money times(int mutiplier) {
+    return new Dollar(amount * mutiplier);
+}
+```
+
+다음으론, Money의 두 하위 클래스는 그다지 많은 일을 하지 않아 보인다. 
+하위 클래스에 대한 직접적인 참조가 적어진다면 하위 클래스를 제거하기 위해 한발 짝 더 다가섰다고 볼 수 있겠다. 
+Money에 하위 클래스를 반환하는 팩토리 메서드를 도입 해 보자.
+
+``` java
+public void testMultiplication() {
+    Money five = Money.dollar(5);
+    assertEquals(Money.dollar(10), five.times(2));
+    assertEquals(Money.dollar(15), five.times(3));
+}
+```
+Money 객체를 아래와 같이 수정한다. times()를 정의할 준비가 안되었기 때문에 Money를 추상클래스로 변경한 후, Money.times()를 선언하자. 
+
+**Money**
+``` java
+abstract class Money {
+
+    ...
+
+    static Dollar dollar(int amount) {
+        return new Dollar(amount);
+    }
+
+    abstract Money times(int mutiplier);
+}
+```
+모든 테스트가 실행되는 것을 확인 할 수 있다. Franc도 위와 같이 수정하자.
+이렇게 수정함으로 인해 어떤 클라이언트 코드도 Dollar라는 하위 클래스가 있다는 사실을 알지 못한다. 
+하위 클래스를 테스트에서 분리 (decoupling)함으로써 어떤 모델 코드에도 영향을 주지 않고 상속 구조를 마음대로 변경할 수 있게 됐다. 
 
 
 

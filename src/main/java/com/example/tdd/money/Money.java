@@ -1,6 +1,6 @@
 package com.example.tdd.money;
 
-public class Money {
+abstract class Money {
 
     protected int amount;
 
@@ -9,4 +9,14 @@ public class Money {
         return amount == money.amount
                 && getClass().equals(money.getClass());
     }
+
+    static Dollar dollar(int amount) {
+        return new Dollar(amount);
+    }
+
+    static Franc franc(int amount) {
+        return new Franc(amount);
+    }
+
+    abstract Money times(int mutiplier);
 }
