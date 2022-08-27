@@ -251,5 +251,92 @@ abstract class Money {
 이렇게 수정함으로 인해 어떤 클라이언트 코드도 Dollar라는 하위 클래스가 있다는 사실을 알지 못한다. 
 하위 클래스를 테스트에서 분리 (decoupling)함으로써 어떤 모델 코드에도 영향을 주지 않고 상속 구조를 마음대로 변경할 수 있게 됐다. 
 
+---
+## 9장. 우리가 사는 시간
+통화 개념을 테스트 해보재
+``` java
+public void testCurrency() {
+    assertEquals("USD", Money.dollar(1).currency());
+    assertEquals("CHF", Money.franc(1).currency());
+}
+```
+우선 Money에 currency() 메서드를 선언하자.
+
+``` java
+abstract String currency();
+```
+그 다음, 드 하위 클래스에서 이를 구현 하자.
+``` java
+// Franc
+String currency() {
+    return "CHF";
+}
+// Dollar
+String currency() {
+    return "USD";
+}
+```
+두 클래스를 모두 포함할 수 있는 동일한 구현을 할 수 있을 것이다. 통화를 인스턴스 변수에 저장하고, 메서드에서는 그냥 반환하게 만들어 보자.
+``` java
+// Franc
+private String currency;
+
+Franc(int amount) {
+    this.amount = amount;
+    currency = "CHF";
+}
+
+String currency() {
+    return currency;
+}
+```
+이렇게 하면 두 currency()가 동일하므로 변수 선언과 currency() 구현울 달다 위로(Money) 올릴 수 있게 되었다. 
+
+``` java
+// Money
+protected String currency;
+
+String currency() {
+    return currency;
+}
+```
+문자열 "USD"와 "CHF"를 정적 팩토리 메서드로 옭긴다면 두 새엇ㅇ자가 동일해 질 것이고, 그렇다면 공통 구현을 만들 수 있다. 
+``` java
+Franc(int amount, String currency) {
+    this.amount = amount;
+    this.currency = "CHF";
+}
+```
+생성자를 호출 하는 두 곳이 깨지게 된다. Franc 내의 times 같은 경우는 Mooney.franc()를 사용해 팩토리 메서도를 호출하도록 하자.
+``` java
+Money times(int multiplier) {
+    return Money.franc(amount * multiplier);
+}
+```
+이제 팩토리 메서드가 "CHF"를 전달 할 수 있게 되었고, 인자를 인스턴스 변수에 할당 할 수 있다.
+``` java
+static Franc franc(int amount) {
+    return new Franc(amount, "CHF");
+}
+```
+``` java
+Franc(int amount, String currency) {
+    this.amount = amount;
+    this.currency = currency;
+}
+```
+Dollar도 유사한 방ㅎ식으로 수정 했다. 두 생성자가 이제 동일해 졌으므로 구현을 상위 클래스로 옮기자.
+``` java
+public Money(int amount, String currency) {
+    this.amount = amount;
+    this.currency = currency;
+}
+```
+``` java
+Franc(int amount, String currency) {
+    super(amount, currency);
+}
+```
+times()를 상위 클래스로 올리고 하위 클래스들을 제거할 준비가 거의 다 됐다.
 
 
