@@ -339,4 +339,93 @@ Franc(int amount, String currency) {
 ```
 times()를 상위 클래스로 올리고 하위 클래스들을 제거할 준비가 거의 다 됐다.
 
+---
+## 10장. 흥미로운 시간
+Money를 나태기위한 단 하나의 클래스만을 갓도록 수정해보자.  
+Franc과 Dollar 클래스의 times() 메소드를 동일하게 만들기 위한 명학한 방법이 없다. 팩토리 메서드를 인라인으로 수정하자.
+``` java
+Money times(int multiplier) {
+    return new Franc(amount * multiplier, currency);
+}
+```
+Dollar도 위와 같은 방식으로 변경하자. 그런데, 정말 Franc을 반환하는 것 일까? 우선 Money를 반환하도록 고쳐보자.
+``` java
+Money times(int multiplier) {
+    return new Money(amount * multiplier, currency);
+}
+```
+그러자 컴파일러가 Money를 콘크리트 클래스로 바꿔야 한다고 말한다. 아래와 같이 수정하자.
+``` java
+class Money {
+    ,,,
+    Money time(int amount) {
+        return null;
+    }
+}
+```
+그리고 테스트를 돌리면 빨긴 막대가 뜬다. 메시지를 보기 위해 toString()을 정의하자.
+``` java
+ public String toString() {
+    return amount + " " + currency ;
+}
+```
+그 후 테스트를 돌리면 메시지를 명확히 확인할 수 있다.
+
+`com.example.tdd.money.Franc@6d6d480c<10 CHF> but was: com.example.tdd.money.Money@e95595b<10 CHF>`  
+클래스가 달라 에러가 발생한 것이다. 문제는 equals()구현에 있다. 
+``` java
+public boolean equals(Object object) {
+    Money money = (Money) object;
+    return amount == money.amount
+            && getClass().equals(money.getClass());
+}
+```
+여기서 검사해야 할 것은 클래스가 같은지 아니라 currency가 같은지 여부다. 이를 위한 테스트 코드를 작성하자.
+``` java
+public void testDifferentClassEquality() {
+    assertTrue(new Money(10, "CHF").equals(new Franc(10, "CHF")));
+}
+```
+equals() 코드는 클래스가 아니라 currency를 비교하도록 변경하자. 
+``` java
+public boolean equals(Object object) {
+    Money money = (Money) object;
+    return amount == money.amount
+            && currency().equals(money.currency());
+}
+```
+이제 모든 테스트가 동작한다. 두 구현이 동일해 졌으니, 상위클래스로 끌어올리자. 
+``` java
+Money times(int mutiplier) {
+    return new Money(amount * mutiplier, currency);
+}
+```
+곱하기도 구현했으니, 하위 클래스들을 제거할 수 있겠다.
+
+---
+## 11장. 모든 악의 근원
+두 하위 클래스 Dollar와 Franc은 달랑 생성자 밖에 없다. 생성자 때문에 하위 클래스가 있을 필요는 없기 때문에 하위 클래스를 제거하자.
+``` java
+static Money dollar(int amount) {
+    return new Money(amount, "USD");
+}
+
+static Money franc(int amount) {
+    return new Money(amount, "CHF");
+}
+```
+이제 Dollar에 대한 참조는 하나도 없으므로 Dollar는 지워버리자. 반면에 Franc은 테스트 코드에서 아직 참조한다. 
+testDifferentClassEquality()를 지워도 될 정도로 다른 곳에서 테스트를 충분히 하고 있는지 testEquality()를 돌려보자.
+``` java
+public void testEquality() {
+    assertTrue(Money.dollar(5).equals(Money.dollar(5)));
+    assertFalse(Money.dollar(5).equals(Money.dollar(6)));
+    assertFalse(Money.franc(5).equals(Money.dollar(5)));
+}
+```
+테스트가 잘 돌아간다. 중복된 테스트 단언은 지우자. Franc과 함께 testDifferentClassEquality() 도 지워버리자.
+testFrancMultiplication()을 지워도 시스템 동작에 대한 신뢰는 잃지 않을 것이다.
+
+---
+
 
