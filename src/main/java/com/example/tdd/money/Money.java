@@ -1,6 +1,6 @@
 package com.example.tdd.money;
 
-class Money {
+class Money implements Expression {
 
     protected int amount;
 
@@ -27,6 +27,10 @@ class Money {
 
     Money times(int mutiplier) {
         return new Money(amount * mutiplier, currency);
+    }
+
+    Expression plus(Money added) {
+        return new Money(amount + added.amount, currency);
     }
 
     protected String currency() {

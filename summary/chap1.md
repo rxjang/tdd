@@ -427,5 +427,62 @@ public void testEquality() {
 testFrancMultiplication()을 지워도 시스템 동작에 대한 신뢰는 잃지 않을 것이다.
 
 ---
+## 12장. 드디어, 더하기
+간단한 더하기 테스트 코드를 작성해보자.
+``` java
+public void testSimpleAddition() {
+    Money sum = Money.dollar(5).plus(Money.dollar(5));
+    assertEquals(Money.dollar(10), sum);
+}
+```
+plus는 다음과 같이 구현해 보자.
+``` java
+Money plus(Money added) {
+    return new Money(amount + added.amount, currency);
+}
+```
+설계상 가장 어려운 제약은 다중 통화 사용에 대한 내용을 시스템의 나머지 코드에 숨기고 싶다는 것이다. 객체를 사용해 이를 해결하자. 
+Money와 비슷하게 동작하지만 사실은 두 Money의 합을 나타내는 객체를 만듦으로서 이를 해결 할 수 있을 것이다. 
+이를 설명하기 위해 두 가지 메타포를 사용하자. 
+1. Money의 합을 마치 지갑처럼 취급하는 것이다. 한 지갑에는 금액과 통화가 다른 여러 화폐들이 들어갈 수 있다.
+2. '(2 +3) x 5'와 같은 수식이다. 이렇게 하면 Money를 수식의 가장 작은 단위로 볼 수 있다. 연산의 결과로 Expression들이 생기는데, 그 중 하나는 합(sum)이 될것이다. 연산이 완료되면, 환율을 이용해 결과 Expression을 단일 통화로 축약할 수 있다. 
+
+이 메타포를 테스트에 적용해보자.  
+``` java
+public void testSimpleAddition() {
+    Money sum = Money.dollar(5).plus(Money.dollar(5));
+    Money reduced = bank.reduce(sum, "USD");
+    assertEquals(Money.dollar(10), reduced);
+}
+```
+컴파일하기 위해 Expression 인터페이스가 필요하다. 
+``` java
+public interface Expression {
+}
+```
+Money.plus()는 Expression을 반환해야 한다. 
+``` java
+Expression plus(Money money) {
+    return new Money(amount + added.amount, currency);
+}
+```
+이건 Moneyrk Expression을 구현해야한다는 뜻이다. 
+``` java
+class Money implements Expression {
+    ...
+}
+```
+이제 reduce()스텁이 있는 Bank클래스가 필요하다. 
+``` java
+public class Bank {
+    Money reduce(Expression source, String to) {
+        return Money.dollar(10);
+    }
+}
+```
+다시 초록막대로 돌아왔고, 리펙토링 준비가 완료되었다. 
+
+---
+
 
 
