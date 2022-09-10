@@ -29,8 +29,12 @@ class Money implements Expression {
         return new Money(amount * mutiplier, currency);
     }
 
-    Expression plus(Money added) {
-        return new Money(amount + added.amount, currency);
+    public Money reduce(String to) {
+        return this;
+    }
+
+    Expression plus(Money addend) {
+        return new Sum(this, addend);
     }
 
     protected String currency() {

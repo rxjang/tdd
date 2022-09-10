@@ -483,6 +483,130 @@ public class Bank {
 다시 초록막대로 돌아왔고, 리펙토링 준비가 완료되었다. 
 
 ---
+## 13장. 진짜로 만들기
+우선, Money.plus()는 그냥 Money가 아닌 Expression(sum)을 반환해야 한다. 두 Money의 합은 Sum이어야 한다. 
+``` java
+public void testPlusReturnSum() {
+    Money five = Money.dollar(5);
+    Expression result = five.plus(five);
+    Sum sum = (Sum) result;
+    assertEquals(five, sum.augend);
+    assertEquals(five, sum.addend);
+}
+```
+위 테스트는 금방 수정될 것이다. 위 테스트는 수행하고자 하는 연산의 외부 행위가 아닌 내부 구현에 대해 너무 깊게 관여하고 있다. 
+이 코드를 컴파일하기 위해선 augend와 addend필드를 가지는 Sum클래스가 팔요하다. 
+``` java
+public class Sum {
+    Money augend;
+    Money addend;
+}
+```
+Money.plus()는 Sum이 아닌 Money를 반환하게 되어 있기 때문에, 코드는 ClassCastException을 발생시킨다.
+``` java
+Expression plus(Money addend) {
+    return new Sum(this, addend);
+}
+```
+Sum생성자도 필요하다. 그리고 Sum은 Expression의 일종이어야 한다. 
+``` java
+public class Sum implements Expression{
 
+    public Sum(Money augend, Money addend) {
+        this.addend = addend;
+    }
+    ```
+}
+```
+이제 시시틈에 다시 컴파일되는 상태로 돌아왔다. 하지만 테스트는 여전히 실패하는데, Sum생성자에서 필드를 설정하지 않기 때문이다. 
+``` java
+public Sum(Money augend, Money addend) {
+    this.augend = augend;
+    this.addend = addend;
+}
+```
+이제 Bank.reduce()는 Sum을 전달받는다. 만약 Sum이 가지고 있는 Money의 통화가 모두 동일하고, reduce를 통해 얻어내고자 하는 Money의 통화 역시 같다면, 결과는 Sum내에 있는 Money들의 amount를 합친 값을 갖는 Money객체여야 한다.
+``` java
+public void testReduceSum() {
+    Expression sum = new Sum(Money.dollar(3), Money.dollar(4));
+    Bank bank = new Bank();
+    Money result = bank.reduce(sum,  "USD");
+    assertEquals(Money.dollar(7), result); 
+}
+```
+Sum을 계산하면 결과는 Money가 되어야 하며, 그 Money의 양은 두 Money 양의 합이고, 통화는 우리가 축약하는 통화여야 한다.
+### Bank
+``` java
+Money reduce(Expression source, String to) {
+    Sum sum = (Sum) source;
+    int amount = sum.augend.amount + sum.addend.amount;
+    return new Money(amount, to);
+}
+```
+이 코드는 다음 이유로 지저분하다.
+* 형변환. 이 코드는 모든 Expression에 대해 작동해야한다.
+* 공용 필드와 그 필드들에 대한 두 단계에 거친 래퍼런스
 
+이를 고치기 위해 외부에서 접근 가능한 필드 몇개를 들어내기 위해 메서드 본문을 Sum으로 옮길 수 있다. 
+### Bank
+``` java
+Money reduce(Expression source, String to) {
+    Sum sum = (Sum) source;
+    return sum.reduce(to);
+}
+```
+### Sum
+``` java
+public Money reduce(String to) {
+    int amount = augend.amount + addend.amount;
+    return new Money(amount, to);
+}
+```
+테스트를 구현해보자.
+``` java
+public void testReduceMoney() {
+    Bank bank = new Bank();
+    Money result = bank.reduce(Money.dollar(1),  "USD");
+    assertEquals(Money.dollar(1), result);
+}
+```
+``` java
+Money reduce(Expression source, String to) {
+    if (source instanceof Money) {
+        return (Money) source;
+    }
+    Sum sum = (Sum) source;
+    return sum.reduce(to);
+}
+```
+지저분하지만 리팩토링을 할 수 있다. 클래스를 명시적으로 검사하는 코드가 있을 때에는 항상 다형성을 사용하도록 바꾸는 것이 좋다. 
+### Bank
+``` java
+Money reduce(Expression source, String to) {
+    if (source instanceof Money) {
+        return (Money) source.reduce(to);
+    }
+    Sum sum = (Sum) source;
+    return sum.reduce(to);
+}
+```
+### Money
+``` java
+public Money reduce(String to) {
+    return this;
+}
+```
+### Expression
+``` java
+Money reduce(String to);
+```
+이제 지저분한 캐스틍과 클래스 검사 코드를 제거 할 수 있다. 
+### Bank
+``` java
+Money reduce(Expression source, String to) {
+    Sum sum = (Sum) source;
+    return sum.reduce(to);
+}
+```
+---
 
