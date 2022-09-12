@@ -609,4 +609,119 @@ Money reduce(Expression source, String to) {
 }
 ```
 ---
+## 14장. 바꾸기
+통화 변환을 수행하는 테스트 코트드를 작성해보자. 
+``` java
+public void testReduceMoneyDifferentCurrency() {
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+    Money result = bank.reduce(Money.franc(2), "USD");
+    assertEquals(Money.dollar(1), result);
+}
+```
+프랑을 달러로 변환할 때 간단히 나누기 2를 하고, 코드를 작성하자. 
+### Money
+``` java
+public Money reduce(String to) {
+    int rate = (currency.equals("CHF") && to.equals("USD"))
+            ? 2
+            : 1;
+    return new Money(amount / rate, to);
+}
+```
+이 코드로 인해 Money가 환율에 대해 알게 돼 버렸다. 환울에 대한 일은 모두 Bank가 처리해야 한다. 
+### Bank 
+``` java
+Money reduce(Expression source, String to) {
+    return source.reduce(this, to);
+}
+```
+### Expression
+``` java
+Money reduce(Bank bank, String to);
+```
+### Sum
+``` java
+public Money reduce(Bank bank, String to) {
+    int amount = augend.amount + addend.amount;
+    return new Money(amount, to);
+}
+```
+### Money
+``` java
+ public Money reduce(Bank bank, String to) {
+    int rate = (currency.equals("CHF") && to.equals("USD"))
+            ? 2
+            : 1;
+    return new Money(amount / rate, to);
+}
+```
+인터페이스에 선언된 메서드는 공용이어야 하므로 Money의 reduce()도 공용어이어 한다. 이제 환율을 Bank에서 계산할 수 있게 됐다.
+### Bank
+``` java
+int rate(String from, String to) {
+    return (from.equals("CHF") && to.equals("USD")) 
+            ? 2 
+            : 1;
+}
+```
+### Money
+``` java
+public Money reduce(Bank bank, String to) {
+    int rate = bank.rate(currency, to);
+    return new Money(amount / rate, to);
+}
+```
+2가 아직도 테스트와 코드 모두에 나온다. 이걸 없애기 위해 Bank에 환율표를 가지고 있다가 필요할 때 찾아볼 수 있게 해야한다. 이를 위한 객체를 따로 만들자.
+``` java
+private class Pair {
+    private String from;
+    private String to;
 
+    Pair(String from, String to) {
+        this.from = from;
+        this.to = to;
+    }
+
+    public boolean equals(Object object) {
+        Pair pair = (Pair) object;
+        return from.equals(pair.from) && to.equals(pair.to);
+    }
+
+    public int hashCode() {
+        return 0;
+    }
+}
+```
+0은 최악의 해시 코드다. 나중에 많은 통화를 다루게 될 때 개선하자.  
+환율을 저장할 곳과 설정할 코드가 필요하다. 또, 필요할 떄 환율을 얻어낼 수도 있어야 한다. 
+``` java
+class Bank {
+
+    private Hashtable<Pair, Integer> rates = new Hashtable();
+
+    ```
+    
+    int rate(String from, String to) {
+        return rates.get(new Pair(from, to));
+    }
+
+    void addRate(String from, String to, int rate) {
+        rates.put(new Pair(from ,to), rate);
+    }
+}
+```
+USD에서 USD로의 환율을 요청하면 그 값이 1이되어야 한다는 테스트를 추가해야 한다. 
+``` java
+public void testIdentityRate() {
+    assertEquals(1, new Bank().rate("USD", "USD"));
+}
+```
+이는 아래와 같이 해결 할 수 있다. 
+### Bank
+``` java
+int rate(String from, String to) {
+    if (from.equals(to)) return 1;
+    return rates.get(new Pair(from, to));
+}
+```
