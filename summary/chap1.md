@@ -725,3 +725,86 @@ int rate(String from, String to) {
     return rates.get(new Pair(from, to));
 }
 ```
+---
+## 15장. 서로 다른 통화 더하기
+이제 $5 + 10CHF에 대한 테스트를 할 준비가 되었다. 
+``` java
+public void testMixedAddition() {
+    Expression fiveBucks = Money.dollar(5);
+    Expression tenFrancs = Money.franc(10);
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+    Money result = bank.reduce(fiveBucks.plus(tenFrancs), "USD");
+    assertEquals(Money.dollar(10), result);
+}
+```
+컴파일에러가 발생한다. 우선 컴파일되도록 수정해보자.
+``` java
+ public void testMixedAddition() {
+    Money fiveBucks = Money.dollar(5);
+    Money tenFrancs = Money.franc(10);
+    Bank bank = new Bank();
+    bank.addRate("CHF", "USD", 2);
+    Money result = bank.reduce(fiveBucks.plus(tenFrancs), "USD");
+    assertEquals(Money.dollar(10), result);
+}
+```
+테스가 실패한다. 10USD대신 15USD가 나왔다. Sum.reduce()가 인자를 축약하지 않았다. 인자들을 축약하면 테스트가 통과할 것이다.
+### Sum
+``` java
+public Money reduce(Bank bank, String to) {
+    int amount = augend.reduce(bank, to).amount 
+            + addend.reduce(bank, to).amount;
+    return new Money(amount, to);
+}
+```
+테스트에 통과했다. Expression이어야하는 Money들을 조금씩 없애보자. 
+### Sum
+``` java
+Expression augend;
+Expression addend;
+
+public Sum(Expression augend, Expression addend) {
+    this.augend = augend;
+    this.addend = addend;
+}
+```
+plus()인자와 times()의 반환값도 Expression으로 취급 될 수 있다.
+``` java
+Expression plus(Expression addend) {
+    return new Sum(this, addend);
+}
+
+Expression times(int mutiplier) {
+    return new Money(amount * mutiplier, currency);
+}
+```
+이제 테스트 케이스에 나오는 plus()의 인자도 바꿀수 있다. 
+``` java
+ public void testMixedAddition() {
+        Expression fiveBucks = Money.dollar(5);
+        Expression tenFrancs = Money.franc(10);
+        Bank bank = new Bank();
+        bank.addRate("CHF", "USD", 2);
+        Money result = bank.reduce(fiveBucks.plus(tenFrancs), "USD");
+        assertEquals(Money.dollar(10), result);
+}
+```
+Expression에 plus()를 정의하자.
+``` java
+Expression plus(Expression addend);
+```
+이제 Money와 Sum에도 추가해야한다. 
+### Money
+``` java
+public Expression plus(Expression addend) {
+    return new Sum(this, addend);
+}
+```
+### Sum
+``` java
+public Expression plus(Expression addend) {
+    return null;
+}
+```
+Sum 구현은 스텁으로 구현하고, 추후에 수정하자. 

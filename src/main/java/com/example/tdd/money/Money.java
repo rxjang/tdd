@@ -25,7 +25,7 @@ class Money implements Expression {
         return new Money(amount, "CHF");
     }
 
-    Money times(int mutiplier) {
+    Expression times(int mutiplier) {
         return new Money(amount * mutiplier, currency);
     }
 
@@ -34,7 +34,7 @@ class Money implements Expression {
         return new Money(amount / rate, to);
     }
 
-    Expression plus(Money addend) {
+    public Expression plus(Expression addend) {
         return new Sum(this, addend);
     }
 
