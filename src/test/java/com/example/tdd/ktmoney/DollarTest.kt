@@ -13,4 +13,10 @@ class DollarTest {
         products = five.times(3)
         assertThat(products.amount).isEqualTo(15)
     }
+
+    @Test
+    fun testEquality() {
+        assertThat(Dollar(5)).isEqualTo(Dollar(5))
+        assertThat(Dollar(5)).isNotEqualTo(Dollar(6))
+    }
 }

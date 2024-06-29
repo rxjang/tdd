@@ -1,6 +1,6 @@
 package com.example.tdd.ktmoney
 
-class Dollar(
+data class Dollar(
     var amount: Int,
 ) {
 
