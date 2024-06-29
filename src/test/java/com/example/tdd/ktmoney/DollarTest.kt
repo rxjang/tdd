@@ -8,10 +8,8 @@ class DollarTest {
     @Test
     fun testMultiplication() {
         val five = Dollar(5)
-        var products = five.times(2)
-        assertThat(products.amount).isEqualTo(10)
-        products = five.times(3)
-        assertThat(products.amount).isEqualTo(15)
+        assertThat(five.times(2)).isEqualTo(Dollar(10))
+        assertThat(five.times(3)).isEqualTo(Dollar(15))
     }
 
     @Test

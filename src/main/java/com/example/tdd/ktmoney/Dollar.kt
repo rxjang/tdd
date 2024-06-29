@@ -1,7 +1,7 @@
 package com.example.tdd.ktmoney
 
 data class Dollar(
-    var amount: Int,
+    private val amount: Int,
 ) {
 
     fun times(multiplier: Int): Dollar {

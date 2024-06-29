@@ -112,17 +112,19 @@ fun times(multiplier: Int): Dollar {
 ---
 ## 4장. 프라이버시
 앞 장에서 동치성 문제를 적용 했으므로, 코드를 수정해 보자.
-``` java
-public void testMultiplication() {
-    Dollar five = new Dollar(5);
-    assertEquals(new Dollar(10), five.times(2));
-    assertEquals(new Dollar(15), five.times(3));
+``` kotlin
+fun testMultiplication() {
+    val five = Dollar(5)
+    assertThat(five.times(2)).isEqualTo(Dollar(10))
+    assertThat(five.times(3)).isEqualTo(Dollar(15))
 }
 ```
 이로 인해 amount를 private으로 바꿀 수 있게 되었다.
 
-``` java
-private int amount;
+``` kotlin
+data class Dollar(
+    private val amount: Int,
+) 
 ```
 
 하지만 위험한 상황을 만들었다. 동치성 테스트가 동치성에 대한 코드가 정확히 작동한다는 것을 검증해야 한다.
