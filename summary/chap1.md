@@ -12,11 +12,11 @@
 > * 어떤 금액(주가)을 어떤 수(주식의 수)에 곱한 금액을 결과로 얻을 수 있어야 한다.
 
 테스트를 먼저 만들어 보자.
-```
-public void testMultiplication() {
-    Dollar five = new Dollar(5);
-    five.times(2);
-    assertEquals(10, five.amount);
+``` kotlin
+fun testMultiplication() {
+    val five = Dollar(5)
+    five.times(2)
+    assertThat(five.amount).isEqualTo(10)
 }
 ```
 위 코드는 컴파일 조차 되지 않는다. 다음의 총 네개의 컴파일 에러가 발생한다. 
@@ -27,38 +27,32 @@ public void testMultiplication() {
 
 우선 컴파일이 되게하기 위해, 다음과 같이 코드를 작성헀다.
 
-``` java
-public class Dollar {
+``` kotlin
+class Dollar(
+    var amount: Int,
+) {
 
-    int amount;
-
-    public Dollar(int amount) {
-    
-    }
-
-    void times(int multiplier) {
-    
+    fun times(multiplier: Int) {
+      
     }
 }
 ```
 컴파일 에러가 사라지고 테스트가 동작하지만, 테스트는 실패해 빨간 막대를 볼 수 있을 것이다. 이제 테스트를 통과시키도록 해보자.
 
-``` java
-    int amount = 10;
+``` kotlin
+fun times(multiplier: Int) {
+    this.amount = 10
+}
 ```
 테스트가 성공해 초록색 막대를 보게 된다. 이제 위에서 말한 TDD 주기에 맞게 코드를 수정하자. 
 
-``` java
-public class Dollar {
+``` kotlin
+class Dollar(
+    var amount: Int,
+) {
 
-    int amount;
-
-    public Dollar(int amount) {
-        this.amount = amount;
-    }
-
-    void times(int multiplier) {
-        amount *= multiplier;
+    fun times(multiplier: Int) {
+        this.amount *= multiplier
     }
 }
 ```
