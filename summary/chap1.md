@@ -1,12 +1,12 @@
 # 화폐 예제
 1부에서는 테스트 주도 개발의 리듬을 알아보도록 한다. 리듬은 다음과 같이 요약할 수 있다.
 1. 재빨리 테스트를 하나 추가한다.
-2. 모든 테스트를 샐행하고 새로 추가한 것이 실패하는지 확인한다.
+2. 모든 테스트를 실행하고 새로 추가한 것이 실패하는지 확인한다.
 3. 코드를 조금 바꾼다.
 4. 모든 테스트를 실행하고 전부 성공하는지 확인한다.
 5. 리팩토링을 통해 중복을 제거한다. 
 ---
-## 1장. 다중 통화를 자원하는 Money객체
+## 1장. 다중 통화를 지원하는 Money객체
 > 요구사항
 > * 통화가 다른 두 금액을 더해서 주어진 환율에 맞게 변한 금액을 결과로 얻을 수 있어야 한다. 
 > * 어떤 금액(주가)을 어떤 수(주식의 수)에 곱한 금액을 결과로 얻을 수 있어야 한다.
@@ -19,13 +19,13 @@ fun testMultiplication() {
     assertThat(five.amount).isEqualTo(10)
 }
 ```
-위 코드는 컴파일 조차 되지 않는다. 다음의 총 네개의 컴파일 에러가 발생한다. 
+위 코드는 컴파일 조차 되지 않는다. 다음의 총 네 개의 컴파일 에러가 발생한다. 
 * Dollar 클래스가 없음
 * 생성자가 없음
 * times(int) 메서드 없음
 * amount 필드 없음
 
-우선 컴파일이 되게하기 위해, 다음과 같이 코드를 작성헀다.
+우선 컴파일이 되게하기 위해, 다음과 같이 코드를 작성했다.
 
 ``` kotlin
 class Dollar(
@@ -69,32 +69,32 @@ class Dollar(
 일반적인 TDD 주기는 다음과 같다. 
 1. `테스트를 작성한다.` 올바른 답을 얻기 위해 필요한 이야기의 모든 요소를 포함해 인터페이스를 개발하라.
 2. `실행 가능하게 만든다.` 빨리 초록 막대를 보는 것이 가장 중요하다. 깔끔하고 단순한 해법이 있지만 구현하는데 몇 분 정도 걸릴 것 같으면 적어 놓고 실행 되게 하라. 
-3. `올바르게 만든다.` 시스템이 동작하므로 직전에 저질렀던 죄악을 수숩하자. 중복을 제거하자. 
+3. `올바르게 만든다.` 시스템이 동작하므로 직전에 저질렀던 죄악을 수습하자. 중복을 제거하자. 
 
-즉, 작동하는 깔끔한 코드를 얻기 위해 나누어서 정복하는 것이다. `작동하는` 에 해당하는 부분을 먼저 해결하고 `깔꿈한 코드`부분을 먼저 해결하는 것이다. 
+즉, 작동하는 깔끔한 코드를 얻기 위해 나누어서 정복하는 것이다. `작동하는` 에 해당하는 부분을 먼저 해결하고 `깔끔한 코드`부분을 먼저 해결하는 것이다. 
 
 예제이서 Dollar에 대한 연산을 수행한 후에 해당 Dollar의 값이 바뀌는 것이 이상하다. 테스트코드를 다음과 같이 수정하자.
 
-``` java
-public void testMultiplication() {
-    Dollar five = new Dollar(5);
-    Dollar product = five.times(2);
-    assertEquals(10, product.amount);
-    product = five.times(3);
-    assertEquals(15, product.amount);
+``` kotlin
+fun testMultiplication() {
+    val five = Dollar(5)
+    var products = five.times(2)
+    assertThat(products.amount).isEqualTo(10)
+    products = five.times(3)
+    assertThat(products.amount).isEqualTo(15)
 }
 ```
-``` java
-Dollar times(int multiplier) {
-    amount *= multiplier;
-    return null;
+``` kotlin
+fun times(multiplier: Int): Dollar {
+    this.amount *= multiplier
+    return Dollar(0)
 }
 ```
 테스트는 컴파일되지만 실패 한다. 테스트를 통과하기 위해 올바른 금액을 갖는 새 Dollar를 반환하자.
 
-``` java
-Dollar times(int multiplier) {
-    return new Dollar(amount *= multiplier);
+``` kotlin
+fun times(multiplier: Int): Dollar {
+    return Dollar(amount * multiplier)
 }
 ```
 
