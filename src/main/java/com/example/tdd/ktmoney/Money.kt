@@ -5,7 +5,7 @@ open class Money(
 ) {
     override fun equals(other: Any?): Boolean {
         if (other !is Money) return false
-        return this.amount == other.amount
+        return this.amount == other.amount && other.javaClass == this.javaClass
     }
 
     override fun hashCode(): Int {

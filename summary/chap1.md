@@ -176,24 +176,23 @@ class Dollar(
 ---
 ## 7장. 사과와 오렌지
 Franc과 Dollar를 비교하는 테스트를 작성해보자.
-``` java
-public void testEquality() {
-    assertTrue(new Dollar(5).equals(new Dollar(5)));
-    assertFalse(new Dollar(5).equals(new Dollar(6)));
-    assertTrue(new Franc(5).equals(new Franc(5)));
-    assertFalse(new Franc(5).equals(new Franc(6)));
-    assertFalse(new Franc(5).equals(new Dollar(5)));
+``` kotlin
+fun testEquality() {
+    // Dollar
+    assertThat(Dollar(5)).isEqualTo(Dollar(5))
+    assertThat(Dollar(5)).isNotEqualTo(Dollar(6))
+    // Franc
+    assertThat(Franc(5)).isEqualTo(Franc(5))
+    assertThat(Franc(5)).isNotEqualTo(Franc(6))
+    // Dollar & Franc
+    assertThat(Franc(5)).isEqualTo(Dollar(5))
 }
 ```
 Frac과 Dollar가 equal이어서 실패한다. 동치성 코드에서 두 객체의 클래스를 비교하게 하자. 오직 금액과 클래스가 서로 동일할 떄만 두 Money가 서로 같은 것이다. 
-``` java
-public class Money {
-
-    public boolean equals(Object object) {
-        Money money = (Money) object;
-        return amount == money.amount
-                && getClass().equals(money.getClass());
-    }
+``` kotlin
+override fun equals(other: Any?): Boolean {
+    if (other !is Money) return false
+    return this.amount == other.amount && other.javaClass == this.javaClass
 }
 ```
 모댈 코드에서 클래스를 이런 식으로 사용하는 것은 좀 지저분해 보인다. 하지만 현재는 통화(currency) 개념 같은 게 없으므로 잠시만 이대로 두겠다.
