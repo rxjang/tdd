@@ -1,8 +1,8 @@
 package com.example.tdd.ktmoney
 
-data class Dollar(
-    private val amount: Int,
-) {
+class Dollar(
+    override val amount: Int,
+): Money(amount) {
 
     fun times(multiplier: Int): Dollar {
         return Dollar(amount * multiplier)

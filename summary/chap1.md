@@ -146,35 +146,29 @@ fun testFrancMultiplication() {
 ---
 ## 6.돌아온 '모두를 위한 평등'
 이제 중복을 제거해 보자. 가능한 방법중 한가 지로, 다른 클래스를 우리가 만든 클래스가 상속받도록 하자. 부모 클래스로 Money 객체를 만들자.
-``` java
-public class Money {
-    proteced int amount;
-}
+``` kotlin
+open class Money(
+    protected open val amount: Int,
+)
 ```
 하위 클래스에서도 amount를 볼 수 있도록 private에서 protected로 변경했다. 이제 equals() 코드를 위로 올려보자. 
 
-``` java
-public class Money {
-
-    public boolean equals(Object object) {
-        Money money = (Money) object;
-        return amount == money.amount;
-    }
+``` kotlin
+override fun equals(other: Any?): Boolean {
+    if (other !is Money) return false
+    return this.amount == other.amount
 }
 ```
 Dollar객체와 Fran객체는 Money를 상속 받음으로써 중복을 줄일 수 있게 되었다.
 
-``` java
-public class Dollar extends Money {
+``` kotlin
+class Dollar(
+    override val amount: Int,
+): Money(amount) {
 
-    public Dollar(int amount) {
-        this.amount = amount;
+    fun times(multiplier: Int): Dollar {
+        return Dollar(amount * multiplier)
     }
-
-    Dollar times(int multiplier) {
-        return new Dollar(amount * multiplier);
-    }
-
 }
 ```
 이제 중복은 해결했고, 테스트도 정상적으로 작동한다. 그런데, Franc과 Dollar를 비교하면 어떻게 될까? 
