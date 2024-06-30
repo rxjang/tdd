@@ -134,14 +134,14 @@ data class Dollar(
 `$5 + 10CHF = $10(환율이 2:1일 경우)`  
 이 테스트를 진행 해보자.
 우선은 Dollar와 비슷하게 작동하는 Franc이라는 객체를 검증하기 위한 테스트 부터 만들어 보자.
-``` java
-public void testFrancMultiplication() {
-    Franc five = new Franc(5);
-    assertEquals(new Franc(10), five.times(2));
-    assertEquals(new Franc(15), five.times(3));
+``` kotlin
+fun testFrancMultiplication() {
+    val five = Franc(5)
+    assertThat(five.times(2)).isEqualTo(Franc(10))
+    assertThat(five.times(3)).isEqualTo(Franc(15))
 }
 ```
-우선 Fracn을 작동하기 위해 Dollar 객체를 복사해 Franc을 만들자. 중복은 다음에 제거하도록 하자.
+우선 Franc을 작동하기 위해 Dollar 객체를 복사해 Franc을 만들자. 중복은 다음에 제거하도록 하자.
 
 ---
 ## 6.돌아온 '모두를 위한 평등'

@@ -13,6 +13,13 @@ class DollarTest {
     }
 
     @Test
+    fun testFrancMultiplication() {
+        val five = Franc(5)
+        assertThat(five.times(2)).isEqualTo(Franc(10))
+        assertThat(five.times(3)).isEqualTo(Franc(15))
+    }
+
+    @Test
     fun testEquality() {
         assertThat(Dollar(5)).isEqualTo(Dollar(5))
         assertThat(Dollar(5)).isNotEqualTo(Dollar(6))
