@@ -4,6 +4,7 @@ import java.time.Month
 
 abstract class Money(
     protected open val amount: Int,
+    val currency: String
 ) {
 
     companion object {

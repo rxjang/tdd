@@ -2,9 +2,9 @@ package com.example.tdd.ktmoney
 
 class Franc(
     override val amount: Int,
-): Money(amount) {
+): Money(amount, currency = "CHF") {
 
     override fun times(multiplier: Int): Money {
-        return Franc(amount * multiplier)
+        return Money.franc(amount * multiplier)
     }
 }
