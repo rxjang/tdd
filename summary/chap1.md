@@ -276,63 +276,60 @@ times()를 상위 클래스로 올리고 하위 클래스들을 제거할 준비
 
 ---
 ## 10장. 흥미로운 시간
-Money를 나태기위한 단 하나의 클래스만을 갓도록 수정해보자.  
-Franc과 Dollar 클래스의 times() 메소드를 동일하게 만들기 위한 명학한 방법이 없다. 팩토리 메서드를 인라인으로 수정하자.
-``` java
-Money times(int multiplier) {
-    return new Franc(amount * multiplier, currency);
-}
-```
-Dollar도 위와 같은 방식으로 변경하자. 그런데, 정말 Franc을 반환하는 것 일까? 우선 Money를 반환하도록 고쳐보자.
-``` java
-Money times(int multiplier) {
-    return new Money(amount * multiplier, currency);
+Money를 나태기 위한 단 하나의 클래스만을 가지도록 수정해보자.  
+times()가 Money를 반환하도록 고쳐보자.
+``` kotlin
+override fun times(multiplier: Int): Money {
+    return Money(amount * multiplier)
 }
 ```
 그러자 컴파일러가 Money를 콘크리트 클래스로 바꿔야 한다고 말한다. 아래와 같이 수정하자.
-``` java
-class Money {
-    ,,,
-    Money time(int amount) {
-        return null;
+``` kotlin
+open class Money(
+    open val amount: Int,
+    val currency: String
+) {
+    ...
+    open fun times(multiplier: Int): Money {
+        return Money(0, "")
     }
 }
 ```
 그리고 테스트를 돌리면 빨긴 막대가 뜬다. 메시지를 보기 위해 toString()을 정의하자.
-``` java
- public String toString() {
-    return amount + " " + currency ;
+``` kotlin
+override fun toString(): String {
+    return "Money(amount=$amount, currency='$currency')"
 }
 ```
 그 후 테스트를 돌리면 메시지를 명확히 확인할 수 있다.
 
-`com.example.tdd.money.Franc@6d6d480c<10 CHF> but was: com.example.tdd.money.Money@e95595b<10 CHF>`  
+`expected: "Money(amount=10, currency='USD') (Money@294a6b8e)"
+but was: "Money(amount=10, currency='USD') (Dollar@5b1ebf56)"`  
+
 클래스가 달라 에러가 발생한 것이다. 문제는 equals()구현에 있다. 
-``` java
-public boolean equals(Object object) {
-    Money money = (Money) object;
-    return amount == money.amount
-            && getClass().equals(money.getClass());
+``` kotlin
+ override fun equals(other: Any?): Boolean {
+    if (other !is Money) return false
+    return this.amount == other.amount && other.javaClass == this.javaClass
 }
 ```
 여기서 검사해야 할 것은 클래스가 같은지 아니라 currency가 같은지 여부다. 이를 위한 테스트 코드를 작성하자.
-``` java
-public void testDifferentClassEquality() {
-    assertTrue(new Money(10, "CHF").equals(new Franc(10, "CHF")));
+``` kotlin
+fun testDifferentClassEquality() {
+    assertThat(Money(10, "CHF")).isEqualTo(Franc(10))
 }
 ```
 equals() 코드는 클래스가 아니라 currency를 비교하도록 변경하자. 
-``` java
-public boolean equals(Object object) {
-    Money money = (Money) object;
-    return amount == money.amount
-            && currency().equals(money.currency());
+``` kotlin
+override fun equals(other: Any?): Boolean {
+    if (other !is Money) return false
+    return this.amount == other.amount && this.currency == other.currency
 }
 ```
 이제 모든 테스트가 동작한다. 두 구현이 동일해 졌으니, 상위클래스로 끌어올리자. 
-``` java
-Money times(int mutiplier) {
-    return new Money(amount * mutiplier, currency);
+``` kotlin
+fun times(multiplier: Int): Money {
+    return Money(amount * multiplier, currency)
 }
 ```
 곱하기도 구현했으니, 하위 클래스들을 제거할 수 있겠다.

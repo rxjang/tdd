@@ -36,4 +36,9 @@ class DollarTest {
         assertThat(Money.dollar(1).currency).isEqualTo("USD");
         assertThat(Money.franc(1).currency).isEqualTo("CHF");
     }
+
+    @Test
+    fun testDifferentClassEquality() {
+        assertThat(Money(10, "CHF")).isEqualTo(Franc(10))
+    }
 }
