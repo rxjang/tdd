@@ -200,13 +200,13 @@ override fun equals(other: Any?): Boolean {
 ---
 ## 8장. 객체 만들기
 Franc과 Dollar의 times() 구현 코드는 거의 똑같다. 양쪽 모두 Money를 반환하게 만들면 더 비슷하게 만들 수 있다.
-``` java
-Money times(int mutiplier) {
-    return new Franc(amount * mutiplier);
+``` kotlin
+fun times(multiplier: Int): Money {
+    return Dollar(amount * multiplier)
 }
 
-Money times(int mutiplier) {
-    return new Dollar(amount * mutiplier);
+fun times(multiplier: Int): Money {
+    return Franc(amount * multiplier)
 }
 ```
 
@@ -214,7 +214,7 @@ Money times(int mutiplier) {
 하위 클래스에 대한 직접적인 참조가 적어진다면 하위 클래스를 제거하기 위해 한발 짝 더 다가섰다고 볼 수 있겠다. 
 Money에 하위 클래스를 반환하는 팩토리 메서드를 도입 해 보자.
 
-``` java
+``` kotlin
 public void testMultiplication() {
     Money five = Money.dollar(5);
     assertEquals(Money.dollar(10), five.times(2));
@@ -224,16 +224,18 @@ public void testMultiplication() {
 Money 객체를 아래와 같이 수정한다. times()를 정의할 준비가 안되었기 때문에 Money를 추상클래스로 변경한 후, Money.times()를 선언하자. 
 
 **Money**
-``` java
-abstract class Money {
+``` kotlin
+abstract class Money(
+    protected open val amount: Int,
+) {
 
-    ...
+    companion object {
+        fun dollar (amount: Int): Money = Dollar(amount)
 
-    static Dollar dollar(int amount) {
-        return new Dollar(amount);
+        fun franc (amount: Int): Money = Franc(amount)
     }
 
-    abstract Money times(int mutiplier);
+    abstract fun times(multiplier: Int): Money
 }
 ```
 모든 테스트가 실행되는 것을 확인 할 수 있다. Franc도 위와 같이 수정하자.
