@@ -337,22 +337,25 @@ fun times(multiplier: Int): Money {
 ---
 ## 11장. 모든 악의 근원
 두 하위 클래스 Dollar와 Franc은 달랑 생성자 밖에 없다. 생성자 때문에 하위 클래스가 있을 필요는 없기 때문에 하위 클래스를 제거하자.
-``` java
-static Money dollar(int amount) {
-    return new Money(amount, "USD");
-}
+``` kotlin
+companion object {
+    fun dollar(amount: Int): Money = Money(amount, "USD")
 
-static Money franc(int amount) {
-    return new Money(amount, "CHF");
+    fun franc(amount: Int): Money = Money(amount, "CHF")
 }
 ```
 이제 Dollar에 대한 참조는 하나도 없으므로 Dollar는 지워버리자. 반면에 Franc은 테스트 코드에서 아직 참조한다. 
 testDifferentClassEquality()를 지워도 될 정도로 다른 곳에서 테스트를 충분히 하고 있는지 testEquality()를 돌려보자.
-``` java
-public void testEquality() {
-    assertTrue(Money.dollar(5).equals(Money.dollar(5)));
-    assertFalse(Money.dollar(5).equals(Money.dollar(6)));
-    assertFalse(Money.franc(5).equals(Money.dollar(5)));
+``` kotlin
+fun testEquality() {
+    // Dollar
+    assertThat(Money.dollar(5)).isEqualTo(Money.dollar(5))
+    assertThat(Money.dollar(5)).isNotEqualTo(Money.dollar(6))
+    // Franc
+    assertThat( Money.franc(5)).isEqualTo( Money.franc(5))
+    assertThat( Money.franc(5)).isNotEqualTo( Money.franc(6))
+    // Dollar & Franc
+    assertThat( Money.franc(5)).isNotEqualTo(Money.dollar(5))
 }
 ```
 테스트가 잘 돌아간다. 중복된 테스트 단언은 지우자. Franc과 함께 testDifferentClassEquality() 도 지워버리자.

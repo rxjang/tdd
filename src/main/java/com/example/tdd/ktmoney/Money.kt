@@ -2,18 +2,18 @@ package com.example.tdd.ktmoney
 
 import java.time.Month
 
-open class Money(
-    open val amount: Int,
+class Money(
+    val amount: Int,
     val currency: String
 ) {
 
     companion object {
-        fun dollar(amount: Int): Money = Dollar(amount)
+        fun dollar(amount: Int): Money = Money(amount, "USD")
 
-        fun franc(amount: Int): Money = Franc(amount)
+        fun franc(amount: Int): Money = Money(amount, "CHF")
     }
 
-    fun times(multiplier: Int): Money {
+    operator fun times(multiplier: Int): Money {
         return Money(amount * multiplier, currency)
     }
 
