@@ -2,6 +2,7 @@ package com.example.tdd.ktmoney
 
 import org.assertj.core.api.Java6Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.time.Month
 
 class DollarTest {
 
@@ -25,6 +26,15 @@ class DollarTest {
     fun testCurrency() {
         assertThat(Money.dollar(1).currency).isEqualTo("USD");
         assertThat(Money.franc(1).currency).isEqualTo("CHF");
+    }
+
+    @Test
+    fun testSimpleAddition() {
+        val five = Money.dollar(5)
+        val sum: Expression = five + five
+        val bank = Bank()
+        val reduced = bank.reduce(sum, "USD")
+        assertThat(reduced).isEqualTo(Money.dollar(10))
     }
 
 }

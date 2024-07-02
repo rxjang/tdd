@@ -5,12 +5,16 @@ import java.time.Month
 class Money(
     val amount: Int,
     val currency: String
-) {
+): Expression {
 
     companion object {
         fun dollar(amount: Int): Money = Money(amount, "USD")
 
         fun franc(amount: Int): Money = Money(amount, "CHF")
+    }
+
+    operator fun plus(addend: Money): Expression {
+        return Money(this.amount + addend.amount, currency)
     }
 
     operator fun times(multiplier: Int): Money {
