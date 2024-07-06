@@ -14,7 +14,7 @@ class Money(
     }
 
     operator fun plus(addend: Money): Expression {
-        return Money(this.amount + addend.amount, currency)
+        return Sum(this, addend)
     }
 
     operator fun times(multiplier: Int): Money {
@@ -32,5 +32,9 @@ class Money(
 
     override fun toString(): String {
         return "Money(amount=$amount, currency='$currency')"
+    }
+
+    override fun reduce(to: String): Money {
+        return this
     }
 }
